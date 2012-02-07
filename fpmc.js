@@ -1,7 +1,7 @@
 var
 	sy = require('sylvester'),
 	
-	lambda   = 0.3,
+	lambda   = 0.5,
 	sigma    = 0.2,
 	sigma_sq = Math.pow(sigma, 2);
 	kui      = 8, /* kui = kil ∈ {8, 16, 32, 64, 128} */
@@ -46,12 +46,12 @@ var
 	},
 	
 	yhat = function(u, t, i) {
-		ymf  = vui.col(u).dot(viu.col(i));
+		ymf  = vui.row(u).dot(viu.row(i));
 		l = B[u][t-1];
 		if(typeof l === "undefined") {
 			yfmc = 0;
 		} else {
-			yfmc = vil.col(i).dot(vli.col(l));				
+			yfmc = vil.row(i).dot(vli.row(l));				
 		}
 		return ymf + yfmc;
 	},
@@ -103,7 +103,7 @@ learn_fpmc = function learn_fpmc(s, learning_rate, reg_param, iterations) {
 		/* draw j uniformly from (I \ Btu ) */
 		do {
 			j = s[Math.floor(Math.random() * s.length)][2]
-		} while(j != i);
+		} while(j in B[u]);
 
 
 		/* δ ← ( 1 − σ( ŷ(u,t,i) − ŷ(u,t,j) ) ) */
