@@ -1,7 +1,7 @@
 var
 	sy = require('sylvester'),
 	
-	lambda   = 0.2,
+	lambda   = 0.3,
 	sigma    = 0.2,
 	sigma_sq = Math.pow(sigma, 2);
 	kui      = 8, /* kui = kil ∈ {8, 16, 32, 64, 128} */
@@ -16,9 +16,58 @@ var
 		return sy.Matrix.Zero(n, m).map(function() {
 			return N(mean, stddev);
 		});
-	}
+	},
 	
+	
+	vui = undefined,
+	viu = undefined,
+	vil = undefined,
+	vli = undefined,
+	B = {},
+	u_count = 0,
+	i_count = 0,
+	l_count = 0,
+	
+	initModel = function(s) {
+		B = {};
+		for(var ti = 0; ti < s.length; ti++) {
+			u = s[ti][0];
+			t = s[ti][1];
+			i = s[ti][2];
+			u_count = Math.max(u_count, u);
+			i_count = Math.max(i_count, i);
+			l_count = i_count;
 
+			if(!(u in B)) {
+				B[u] = [];
+			}
+			B[u][t] = i;
+		}
+	},
+	
+	yhat = function(u, t, i) {
+		ymf  = vui.col(u).dot(viu.col(i));
+		l = B[u][t-1];
+		if(typeof l === "undefined") {
+			yfmc = 0;
+		} else {
+			yfmc = vil.col(i).dot(vli.col(l));				
+		}
+		return ymf + yfmc;
+	},
+	
+	recommend = function(u, limit) {
+		t = B[u].length;
+		r = [];
+		for(i = 1; i <= i_count; i++) {
+			r.push([i, yhat(u, t, i)]);
+
+		}
+		r.sort(function(a, b) {
+			return b[1] - a[1];
+		});
+		return r.slice(0, limit);
+	}
 	;
 
 
@@ -33,44 +82,13 @@ sy.Matrix.prototype.setE = function(i, j, v) {
 
 learn_fpmc = function learn_fpmc(s, learning_rate, reg_param, iterations) {
 	
-	var
-		u_count = 0,
-		i_count = 0,
-		l_count = 0,
-		B = {},
-		yhat = function(u, t, i) {
-			ymf  = vui.col(u).dot(viu.col(i));
-			l = B[u][t-1];
-			if(typeof l === "undefined") {
-				yfmc = 0;
-			} else {
-				yfmc = vil.col(i).dot(vli.col(l));				
-			}
-			return ymf + yfmc;
-		}
-		;
-	
-	for(var ti = 0; ti < s.length; ti++) {
-		u = s[ti][0];
-		t = s[ti][1];
-		i = s[ti][2];
-		u_count = Math.max(u_count, u);
-		i_count = Math.max(i_count, i);
-		l_count = i_count;
-		
-		if(!(u in B)) {
-			B[u] = [];
-		}
-		B[u][t] = i;
-	}
+	initModel(s);
 	
 	/* draw VU,I VI,U VI,L VL,I from N(0,σ^2) */
-	var
-		vui = initNormalMatrix(u_count * kui, i_count * kui, 0, sigma_sq),
-		viu = initNormalMatrix(i_count * kui, u_count * kui, 0, sigma_sq),
-		vil = initNormalMatrix(i_count * kil, l_count * kil, 0, sigma_sq),
-		vli = initNormalMatrix(l_count * kil, i_count * kil, 0, sigma_sq)
-		;
+	vui = initNormalMatrix(u_count * kui, i_count * kui, 0, sigma_sq);
+	viu = initNormalMatrix(i_count * kui, u_count * kui, 0, sigma_sq);
+	vil = initNormalMatrix(i_count * kil, l_count * kil, 0, sigma_sq);
+	vli = initNormalMatrix(l_count * kil, i_count * kil, 0, sigma_sq);
 	
 	
 	for(it = 0; it < iterations; it++) {
@@ -138,18 +156,25 @@ learn_fpmc = function learn_fpmc(s, learning_rate, reg_param, iterations) {
 	]
 }
 
-console.log(learn_fpmc(
+
+learn_fpmc(
 	[
 		[1, 1, 1],
 		[1, 2, 2],
-		[2, 1, 1],
-		[2, 2, 2],
-		[3, 1, 3],
-		[3, 2, 4],
-		[4, 1, 3]
+		[1, 3, 3],
+		[2, 1, 3],
+		[2, 2, 1],
+		[2, 3, 2],
+		[3, 1, 4],
+		[3, 2, 5],
+		[4, 1, 4],
+		[4, 2, 5],
+		[5, 1, 4],
+		[6, 1, 1]
 	],
-	0.05,
+	0.9,
 	lambda,
-	3000
-	)
-);
+	30000
+	);
+
+console.log(recommend(6, 5));
