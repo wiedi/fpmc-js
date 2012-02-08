@@ -79,8 +79,8 @@ sy.Matrix.prototype.setE = function(i, j, v) {
 }
 
 
-
-learn_fpmc = function learn_fpmc(s, learning_rate, reg_param, iterations) {
+exports.recommend = recommend;
+exports.learn = function(s, learning_rate, reg_param, iterations) {
 	
 	initModel(s);
 	
@@ -156,7 +156,7 @@ learn_fpmc = function learn_fpmc(s, learning_rate, reg_param, iterations) {
 	]
 }
 
-
+/*
 learn_fpmc(
 	[
 		[1, 1, 1],
@@ -170,11 +170,19 @@ learn_fpmc(
 		[4, 1, 4],
 		[4, 2, 5],
 		[5, 1, 4],
-		[6, 1, 1]
+		[6, 1, 1],
+		[7, 1, 1],
+		[7, 2, 2],
+		[8, 1, 1],
+		[8, 2, 2],
+		[9, 1, 1],
+		[9, 2, 2],
+		
 	],
 	0.9,
 	lambda,
 	30000
 	);
 
-console.log(recommend(6, 5));
+console.log(recommend(6, 50));
+*/
