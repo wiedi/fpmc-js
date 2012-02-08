@@ -20,8 +20,8 @@ function test() {
 	}
 	
 	fpmcs.train(learning_rate, lambda, iterations);
-
-	console.log(fpmc.recommend(6, 8));
+	console.log(train[validation_offset]);
+	console.log(fpmcs.recommend(train[validation_offset][1], 8));
 }
 
 test();

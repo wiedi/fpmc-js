@@ -49,12 +49,20 @@ exports.feedback = function(u, i) {
 }
 
 exports.train = function(learning_rate, lambda, iterations) {
+	console.log('samples=' + s.length + ' users=' + Object.keys(u_to_fpmc).length + ' items=' + Object.keys(i_to_fpmc).length);
 	fpmc.learn(s, learning_rate, lambda, iterations);
 }
 
 exports.recommend = function(u, limit) {
 	ret = [];
-	items = fpmc.recommend(u_to_fpmc[u], limit);
+	if(u in u_to_fpmc) {
+		user = u_to_fpmc[u];		
+	} else {
+		/* unknown user... do something clever */
+		user = 1;
+	}
+
+	items = fpmc.recommend(user, limit);
 	for(i=0; i < items.length; i++) {
 		ret.push(i_from_fpmc[items[i][0]])
 	}

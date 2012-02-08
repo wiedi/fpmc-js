@@ -4,8 +4,8 @@ var
 	lambda   = 0.5,
 	sigma    = 0.2,
 	sigma_sq = Math.pow(sigma, 2);
-	kui      = 8, /* kui = kil ∈ {8, 16, 32, 64, 128} */
-	kil      = 8,
+	kui      = 1, /* kui = kil ∈ {8, 16, 32, 64, 128} */
+	kil      = 1,
 	
 	N = function(mean, stddev) {
 		return (Math.random() * 2 - 1) * stddev + mean;
@@ -54,19 +54,6 @@ var
 			yfmc = vil.row(i).dot(vli.row(l));				
 		}
 		return ymf + yfmc;
-	},
-	
-	recommend = function(u, limit) {
-		t = B[u].length;
-		r = [];
-		for(i = 1; i <= i_count; i++) {
-			r.push([i, yhat(u, t, i)]);
-
-		}
-		r.sort(function(a, b) {
-			return b[1] - a[1];
-		});
-		return r.slice(0, limit);
 	}
 	;
 
@@ -79,7 +66,19 @@ sy.Matrix.prototype.setE = function(i, j, v) {
 }
 
 
-exports.recommend = recommend;
+exports.recommend = function(u, limit) {
+	t = B[u].length;
+	r = [];
+	for(i = 1; i <= i_count; i++) {
+		r.push([i, yhat(u, t, i)]);
+
+	}
+	r.sort(function(a, b) {
+		return b[1] - a[1];
+	});
+	return r.slice(0, limit);
+}
+
 exports.learn = function(s, learning_rate, reg_param, iterations) {
 	
 	initModel(s);
