@@ -4,8 +4,8 @@ var
 	lambda   = 0.5,
 	sigma    = 0.2,
 	sigma_sq = Math.pow(sigma, 2);
-	kui      = 1, /* kui = kil ∈ {8, 16, 32, 64, 128} */
-	kil      = 1,
+	kui      = 8, /* kui = kil ∈ {8, 16, 32, 64, 128} */
+	kil      = 8,
 	
 	N = function(mean, stddev) {
 		return (Math.random() * 2 - 1) * stddev + mean;
@@ -102,7 +102,7 @@ exports.learn = function(s, learning_rate, reg_param, iterations) {
 		/* draw j uniformly from (I \ Btu ) */
 		do {
 			j = s[Math.floor(Math.random() * s.length)][2]
-		} while(j in B[u]);
+		} while(j == i);
 
 
 		/* δ ← ( 1 − σ( ŷ(u,t,i) − ŷ(u,t,j) ) ) */
