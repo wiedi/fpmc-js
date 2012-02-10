@@ -13,7 +13,7 @@ var
 function test() {
 	train = JSON.parse(fs.readFileSync(train_file));
 	validation_offset = train.length / 2 + Math.floor(Math.random() * (train.length / 2))
-	
+	validation_offset = 3000;
 	for(i = 0; i < validation_offset; i++) {
 		if(train[i][0] != 'i') continue;
 		fpmcs.feedback(train[i][1], train[i][3]);
@@ -21,7 +21,7 @@ function test() {
 	
 	fpmcs.train(learning_rate, lambda, iterations);
 	console.log(train[validation_offset]);
-	console.log(fpmcs.recommend(train[validation_offset][1], 8));
+	console.log(fpmcs.recommend(train[validation_offset][1], train[validation_offset][3], 8));
 }
 
 test();

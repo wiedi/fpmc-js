@@ -1,11 +1,13 @@
 var
 	sy = require('sylvester'),
+	lm = require('./matrix'),
+	lazy     = true,
 	
 	lambda   = 0.5,
 	sigma    = 0.2,
 	sigma_sq = Math.pow(sigma, 2);
-	kui      = 8, /* kui = kil ∈ {8, 16, 32, 64, 128} */
-	kil      = 8,
+	kui      = 16, /* kui = kil ∈ {8, 16, 32, 64, 128} */
+	kil      = 16,
 	
 	N = function(mean, stddev) {
 		return (Math.random() * 2 - 1) * stddev + mean;
@@ -17,7 +19,9 @@ var
 			return N(mean, stddev);
 		});
 	},
-	
+	initNormalMatrixLazy = function(n, m, mean, stddev) {
+		return new lm.LazyMatrix(n, m, function() { return N(mean, stddev); });
+	},
 	
 	vui = undefined,
 	viu = undefined,
@@ -51,9 +55,13 @@ var
 		if(typeof l === "undefined") {
 			yfmc = 0;
 		} else {
-			yfmc = vil.row(i).dot(vli.row(l));				
+			yfmc = ahat(i, l);
 		}
 		return ymf + yfmc;
+	},
+	
+	ahat = function(i, l) {
+		return vil.row(i).dot(vli.row(l));
 	}
 	;
 
@@ -63,7 +71,7 @@ sy.Matrix.prototype.setE = function(i, j, v) {
 	if (i < 1 || i > this.elements.length || j < 1 || j > this.elements[0].length) { return null; }
 	this.elements[i - 1][j - 1] = v;
 	return v;
-}
+}	
 
 
 exports.recommend = function(u, limit) {
@@ -71,7 +79,17 @@ exports.recommend = function(u, limit) {
 	r = [];
 	for(i = 1; i <= i_count; i++) {
 		r.push([i, yhat(u, t, i)]);
+	}
+	r.sort(function(a, b) {
+		return b[1] - a[1];
+	});
+	return r.slice(0, limit);
+}
 
+exports.recommendByItem = function(i, limit) {
+	r = [];
+	for(l = 1; l <= i_count; l++) {
+		r.push([l, ahat(i, l)]);
 	}
 	r.sort(function(a, b) {
 		return b[1] - a[1];
@@ -83,11 +101,15 @@ exports.learn = function(s, learning_rate, reg_param, iterations) {
 	
 	initModel(s);
 	
+	if(lazy) {
+		initNormalMatrix = initNormalMatrixLazy;
+	}
+	
 	/* draw VU,I VI,U VI,L VL,I from N(0,σ^2) */
-	vui = initNormalMatrix(u_count * kui, i_count * kui, 0, sigma_sq);
-	viu = initNormalMatrix(i_count * kui, u_count * kui, 0, sigma_sq);
-	vil = initNormalMatrix(i_count * kil, l_count * kil, 0, sigma_sq);
-	vli = initNormalMatrix(l_count * kil, i_count * kil, 0, sigma_sq);
+	vui = initNormalMatrix(u_count, i_count * kui, 0, sigma_sq);
+	viu = initNormalMatrix(i_count, u_count * kui, 0, sigma_sq);
+	vil = initNormalMatrix(i_count, l_count * kil, 0, sigma_sq);
+	vli = initNormalMatrix(l_count, i_count * kil, 0, sigma_sq);
 	
 	
 	for(it = 0; it < iterations; it++) {
@@ -156,7 +178,7 @@ exports.learn = function(s, learning_rate, reg_param, iterations) {
 }
 
 /*
-learn_fpmc(
+exports.learn(
 	[
 		[1, 1, 1],
 		[1, 2, 2],
@@ -183,5 +205,5 @@ learn_fpmc(
 	30000
 	);
 
-console.log(recommend(6, 50));
+console.log(exports.recommend(6, 50));
 */

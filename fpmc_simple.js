@@ -53,19 +53,26 @@ exports.train = function(learning_rate, lambda, iterations) {
 	fpmc.learn(s, learning_rate, lambda, iterations);
 }
 
-exports.recommend = function(u, limit) {
+exports.recommend = function(u, i, limit) {
 	ret = [];
 	if(u in u_to_fpmc) {
-		user = u_to_fpmc[u];		
+		user = u_to_fpmc[u];
+		items = fpmc.recommend(user, limit);
+		for(i=0; i < items.length; i++) {
+			ret.push(i_from_fpmc[items[i][0]])
+		}		
+	} else if(i in i_to_fpmc) {
+		item = i_to_fpmc[i];
+		items = fpmc.recommendByItem(item, limit);
+		for(i=0; i < items.length; i++) {
+			ret.push(i_from_fpmc[items[i][0]])
+		}
 	} else {
-		/* unknown user... do something clever */
-		user = 1;
+		/* TODO: most popular */
+		return [];
 	}
 
-	items = fpmc.recommend(user, limit);
-	for(i=0; i < items.length; i++) {
-		ret.push(i_from_fpmc[items[i][0]])
-	}
+
 	return ret;
 }
 
