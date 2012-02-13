@@ -10,7 +10,17 @@ var
 	kil      = 16,
 	
 	N = function(mean, stddev) {
-		return (Math.random() * 2 - 1) * stddev + mean;
+		mean   = mean   || 0.0;
+		stddev = stddev || 1.0;
+		
+		var s, v1, v2;
+		do {
+			v1 = Math.random() * 2 - 1;
+			v2 = Math.random() * 2 - 1;
+			s = v1 * v1 + v2 * v2;
+		} while(s > 1)
+		
+		return Math.sqrt(-2 * Math.log(s) / s) * v1 * Math.sqrt(stddev) + mean;
 	},
 	
 	// returns n x m Matrix, filled with normal distributed noise
@@ -50,7 +60,9 @@ var
 	},
 	
 	yhat = function(u, t, i) {
-		ymf  = vui.row(u).dot(viu.row(i));
+		var
+			yfmc,
+			ymf = vui.row(u).dot(viu.row(i));
 		l = B[u][t-1];
 		if(typeof l === "undefined") {
 			yfmc = 0;
