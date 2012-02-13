@@ -18,7 +18,7 @@ var
 			v1 = Math.random() * 2 - 1;
 			v2 = Math.random() * 2 - 1;
 			s = v1 * v1 + v2 * v2;
-		} while(s > 1)
+		} while(0 >= s || s > 1)
 		
 		return Math.sqrt(-2 * Math.log(s) / s) * v1 * Math.sqrt(stddev) + mean;
 	},
@@ -214,7 +214,7 @@ exports.learn(
 	],
 	0.9,
 	lambda,
-	30000
+	20
 	);
 
 console.log(exports.recommend(6, 50));
