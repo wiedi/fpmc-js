@@ -59,21 +59,21 @@ var
 		}
 	},
 	
-	yhat = function(u, t, i) {
+	yhat = function(u, t, i, lazy) {
 		var
 			yfmc,
-			ymf = vui.row(u).dot(viu.row(i));
+			ymf = vui.row(u, lazy).dot(viu.row(i, lazy));
 		l = B[u][t-1];
 		if(typeof l === "undefined") {
 			yfmc = 0;
 		} else {
-			yfmc = ahat(i, l);
+			yfmc = ahat(i, l, lazy);
 		}
 		return ymf + yfmc;
 	},
 	
-	ahat = function(i, l) {
-		return vil.row(i).dot(vli.row(l));
+	ahat = function(i, l, lazy) {
+		return vil.row(i, lazy).dot(vli.row(l, lazy));
 	}
 	;
 
@@ -90,7 +90,7 @@ exports.recommend = function(u, limit) {
 	t = B[u].length;
 	r = [];
 	for(i = 1; i <= i_count; i++) {
-		r.push([i, yhat(u, t, i)]);
+		r.push([i, yhat(u, t, i, true)]);
 	}
 	r.sort(function(a, b) {
 		return b[1] - a[1];
@@ -101,7 +101,7 @@ exports.recommend = function(u, limit) {
 exports.recommendByItem = function(i, limit) {
 	r = [];
 	for(l = 1; l <= i_count; l++) {
-		r.push([l, ahat(i, l)]);
+		r.push([l, ahat(i, l, true)]);
 	}
 	r.sort(function(a, b) {
 		return b[1] - a[1];
