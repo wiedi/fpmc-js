@@ -29,7 +29,7 @@ LazyVector.prototype = {
 		var i, product = 0, n = this.elements.length;	
 		if(n != vector.elements.length) { return null; }
 		while(n--) {
-			product += this.e(n) * vector.elements.e(n);
+			product += this.e(n) * vector.e(n);
 		}
 		return product;
     }
